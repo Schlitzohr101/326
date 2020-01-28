@@ -10,7 +10,7 @@ int main() {
     Document  * lib[LIB_SIZE];
 
     //dynamic recent list
-    Document  * recnet_list[REC_SIZE];
+    Document  * recentList[REC_SIZE];
 
     //list holding the ejected values
     vector<Document *> ejected;
@@ -34,9 +34,9 @@ int main() {
     {
         int size = rand()%1000 + 2000;
         //cout << "setting intial size of document#" << i << " to " << size << endl;
-        recnet_list[i] = new Document();
-        recnet_list[i]->setLength(size);
-        recnet_list[i]->initContent();
+        recentList[i] = new Document();
+        recentList[i]->setLength(size);
+        recentList[i]->initContent();
     }
     
     bool exited = false;
@@ -47,8 +47,10 @@ int main() {
     }
     cout << "Or enter (q)uit" << endl;
     string input;
+    
     while (!exited)
     {
+        bool inputError = false;
         // input = new char[256];
         //cout << "before input" << endl; 
         getline(cin, input);
@@ -57,37 +59,75 @@ int main() {
         for (auto &&word : words)
         {
             if (toupper(input[0]) == word[0]) {
+                //cout << "input[0 == word[0]\n"; 
                 if (toupper(input[1]) == word[1]) {
+                    //cout << "setting input to :" << word << endl;
                     input = word;
-                    break;
+                    //break;
                 }
             } else if (toupper(input[0]) == 'Q') {
                 exited = true;
-            }      
+            }
         }
-        if (!exited) {
-            for (auto &&doc : recnet_list)
+        if (input[0] != toupper(input[0])) {
+            inputError = true;
+        }
+        if (!exited && !inputError) {
+            for (auto &&doc : recentList)
             {
                 bool found = doc->findWord(input);
                 if (!found) {
                     ejected.push_back(doc);
-                    doc = new Document();
+                    doc = nullptr;
                 }
             }
             if (!ejected.empty()) {
-                cout << input << ": " << ejected.size() << " documents rejected & reinitialized";
+                cout << input << ": " << ejected.size() << " documents rejected & reinitialized\n\n";
 
             }
+        } else {
+            cout << "ERROR none of the options selected please try again\n";
         }
+        cout << "What word would you like to find: " << endl;
+        for (int i = 0; i < 15; i++) {
+            cout << words[i] << (i+1<15?", ":"\n");
+        }
+        cout << "Or enter (q)uit" << endl;
     }
     
     cout << "Shutting down ..." << endl;
 }
 
-void adjustRec(Document * rec[]) {
-    for (int i = 0; i < 128; i++)
+void adjustLists(Document * rec[],Document * lib[],vector<Document*> eject) {
+    //adjust recent list
+    Document * temp;
+    for (int i = 127; i >= 0; i--)
     {
-        
+        if (rec[i] == nullptr) {
+            int j = i;
+            bool exit = false;
+            while (j+1 <= 128 && !exit)
+            {
+                if (rec[j+1] != nullptr) {
+                    rec[j]   = rec[j+1];
+                    rec[j+1] = nullptr;
+                } else {
+                    exit = true;
+                }
+                j++;
+            }
+        }
     }
+
+    //move top of lib to bottom of rec
+    for (int i = 0; i < eject.size(); i++)
+    {
+        rec[128-eject.size()+i] = lib[i];
+        lib[i] = nullptr;
+    }
+    
+
+    //adjust the lib
+    
     
 }

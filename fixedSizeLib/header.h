@@ -8,7 +8,7 @@
 
 using namespace std;
 
-void adjustRec(Document * rec[]);
+void adjustLists(Document * rec[],Document *lib[],vector<Document*> eject);
 
 
 #endif
