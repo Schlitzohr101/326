@@ -4,11 +4,12 @@
 #include<random>
 #include<ctime>
 #include<vector>
+#include<map>
 #include"document.h"
 
 using namespace std;
 
-void adjustLists(Document * rec[],Document *lib[],vector<Document*> eject);
+void adjustLists(map<int,Document*>&,map<int,Document*>&,map<int,Document*>&);
 
 
 #endif

@@ -10,6 +10,7 @@ class Document {
     
     public:
         Document();
+        Document(int);
         void initContent();
         int getLength();
         void setLength(int);
