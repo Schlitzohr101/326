@@ -13,26 +13,27 @@ int main() {
 
     string words[] = {"FIRST", "CPP", "REVIEW", "PROGRAM", "ASSIGNMENT", "CECS", "BEACH", "ECS", "FALL", "SPRING", "OS", "MAC", "LINUX", "WINDOWS", "LAB"};
 
-    //create the lib array of fixed size 1024
+    //create the lib 
     map<int,Document*> lib;
 
     //dynamic recent list
     map<int,Document*> recentList;
 
     //list holding the ejected values
-    map<int,Document*> ejected;
+    map<int,int> ejected;
 
-    //init lists
+    //init maps
     std::cout << "init Lib" << endl;
     //cout << "------------------------------------------------------------------------------" << endl; 
     
     for (int i = 0; i < LIB_SIZE; i++)
     {
-        
         int size = rand()%1000 + 2000;
         //cout << "setting intial size of document#" << i << " to " << size << endl;
         lib.insert(pair<int,Document*>(i,new Document(size)));
     }
+
+    cout << "lib size: " << lib.size() << endl;
 
     cout << "init recent list" << endl;
     //cout << "------------------------------------------------------------------------------" << endl;
@@ -42,6 +43,8 @@ int main() {
         //cout << "setting intial size of document#" << i << " to " << size << endl;
         recentList.insert(pair<int,Document*>(i,new Document(size)));
     }
+
+    cout << "rec size: " << recentList.size() << endl;
     
     bool exited = false;
 
@@ -49,17 +52,13 @@ int main() {
     for (int i = 0; i < 15; i++) {
         cout << words[i] << (i+1<15?", ":"\n");
     }
-    cout << "Or enter (q)uit" << endl;
+    cout << "Or enter (q)uit: ";
     string input;
     
     while (!exited)
     {
         bool inputError = false;
-        // input = new char[256];
-        //cout << "before input" << endl; 
         getline(cin, input);
-        //cin.get();
-        //cout << "got " << input << endl;
         for (auto &&word : words)
         {
             if (toupper(input[0]) == word[0] && toupper(input[1]) == word[1]) {
@@ -72,14 +71,15 @@ int main() {
             inputError = true;
         }
         if (!exited && !inputError) {
-
-            
+            int index = 0;
             for (auto const& x : recentList)
             {
+                //cout << "checking doc: "<< x.second << endl;
                 if (!x.second->findWord(input))
                 {
-                    ejected.insert(pair<int,Document*>(x.first,x.second));
-                    recentList.erase(x.first);
+                    //cout << "doc didn't contain " << input << endl;
+                    ejected.insert(pair<int,int>(index,x.first));
+                    index++;
                 }  
             }
             if (!ejected.empty()) {
@@ -98,15 +98,23 @@ int main() {
             for (int i = 0; i < 15; i++) {
                 cout << words[i] << (i+1<15?", ":"\n");
             }
-            cout << "Or enter (q)uit" << endl;
+            cout << "Or enter (q)uit: ";
         }
     }
     
     cout << "Shutting down ..." << endl;
 }
 
-void adjustLists(map<int,Document*> &rec,map<int,Document*> &lib,map<int,Document*> &eject) {
+void adjustLists(map<int,Document*> &rec,map<int,Document*> &lib,map<int,int> &eject) {
     //calculate bottom of recent list
+    //delete all indexes stored in eject
+    int ar[eject.size()];
+    for (int i = 0; i < eject.size(); i++)
+    {
+        ar[i] = rec[eject[i]]->getLength();
+        rec.erase(eject[i]);
+    }
+
     int recLargest = -1;
     for (auto const& x : rec)
     {
@@ -114,19 +122,17 @@ void adjustLists(map<int,Document*> &rec,map<int,Document*> &lib,map<int,Documen
     }
     recLargest++;
     
-    cout << "made it past the rec list cal" << endl;
 
     //add top lib files to recent
-    while (rec.size() <= 128)
+    int index = 0;
+    while (rec.size() < 128)
     {
-        int i = 0;
         try {
-            rec[recLargest] = lib.at(i);
-            lib.erase(i);
-        } catch (exception e){
-            cout << "broke it" << endl;
-        }
-        i++;
+            rec.insert(pair<int,Document*>(recLargest,lib.at(index)));
+            lib.erase(index);
+        } catch (exception e){}
+        index++;
+        recLargest++;
     }
 
 
@@ -137,12 +143,12 @@ void adjustLists(map<int,Document*> &rec,map<int,Document*> &lib,map<int,Documen
        libLargest = (x.first > libLargest?x.first:libLargest);
     }
     libLargest++;
-    for (auto const& x : eject)
-    { 
-        x.second->initContent();
-        lib[libLargest] = x.second;
+    for (int i = 0; i < eject.size(); i++)
+    {
+        lib[libLargest] = new Document(ar[i]);
         libLargest++;
     }
+    
     
     //clear ejected
     eject.clear();

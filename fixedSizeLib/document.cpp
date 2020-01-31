@@ -19,9 +19,10 @@ void Document::initContent() {
     //     content[i] = word[i];
     // }
     
-    
+    //cout << "-----------------------------------------------" <<endl;
     for (int i = 0; i < length; i++) {
         content[i] = rand()%26 + 65;
+        //cout << content[i] << (i+1<length?", ":"\n");
     }
 }
 

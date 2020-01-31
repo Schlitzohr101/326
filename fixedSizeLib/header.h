@@ -9,7 +9,7 @@
 
 using namespace std;
 
-void adjustLists(map<int,Document*>&,map<int,Document*>&,map<int,Document*>&);
+void adjustLists(map<int,Document*>&,map<int,Document*>&,map<int,int>&);
 
 
 #endif
