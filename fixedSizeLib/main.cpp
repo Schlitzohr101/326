@@ -85,7 +85,6 @@ int main() {
             if (!ejected.empty()) {
                 cout << input << ": " << ejected.size() << " documents rejected & reinitialized\n\n";
                 adjustLists(recentList,lib,ejected);
-                ejected.clear();
             } else {
                 cout << input << ": found in all cases, no files reinitialized\n\n";
             }
@@ -107,67 +106,45 @@ int main() {
 }
 
 void adjustLists(map<int,Document*> &rec,map<int,Document*> &lib,map<int,Document*> &eject) {
-    //adjust recent list
-    if (eject.size() < 128) {
-        cout << "adjusting the recent list" << endl;
-        int currentKey = 0;
-        for (auto const& x : rec)
-        {
-            cout << x.first << endl;
-        }
-    }
-
-    cout << eject.size() << endl;
-    cout << "adding lib files to recent" << endl;
-    //move top of lib to bottom of rec
-    for (int i = 0; i < eject.size(); i++)
+    //calculate bottom of recent list
+    int recLargest = -1;
+    for (auto const& x : rec)
     {
-        //cout << "128-eject.size()+i: " << 128-eject.size()+i << endl;
-        rec[128-eject.size()+i] = lib[i];
-        lib[i] = nullptr;
+       recLargest = (x.first > recLargest?x.first:recLargest);
     }
-
-    cout << "recent list status: " << endl;
-    int nulls = 0;
-    for (int i = 0; i < 128; i++) {
-        if (rec[i] == nullptr) {
-            nulls++;
-        }
-        cout << rec[i] << endl;
-    }
-    cout << "There are " << nulls << " nullpointers" << endl;
-
+    recLargest++;
     
-    //this list will hold the temp files as we move along the lib
-    Document * tempAr[eject.size()];
-    Document * temp;
-    cout << "adjust the lib" << endl;
-    int i = 1023; //start at the last index, we are gonna be moving these up the list
-    int tempPlace = 0;
-    while (i >= 0)
+    cout << "made it past the rec list cal" << endl;
+
+    //add top lib files to recent
+    while (rec.size() <= 128)
     {
-        //cout << "lib[" << i << "]: " << lib[i] << endl;
-        if (tempPlace >= eject.size()) {
-            tempPlace = 0;
+        int i = 0;
+        try {
+            rec[recLargest] = lib.at(i);
+            lib.erase(i);
+        } catch (exception e){
+            cout << "broke it" << endl;
         }
-        if (i < eject.size()) { //dont need to start replacing the values, so just store
-            tempAr[tempPlace] = lib[i];
-            lib[i] = nullptr;
-        } else { //hopefully our shit is solid here so we can just replace vals
-            temp = lib[i];
-            lib[i] = tempAr[tempPlace];
-            tempAr[tempPlace] = temp;
-        }
-        tempPlace++;
-        i--;
+        i++;
     }
 
-    //     cout << "lib status: " << endl;
-    // nulls = 0;
-    // for (int i = 0; i < 1024; i++) {
-    //     if (lib[i] == nullptr) {
-    //         nulls++;
-    //     }
-    //     cout << lib[i] << endl;
-    // }
+
+
+    int libLargest = -1;
+    for (auto const& x : lib)
+    {
+       libLargest = (x.first > libLargest?x.first:libLargest);
+    }
+    libLargest++;
+    for (auto const& x : eject)
+    { 
+        x.second->initContent();
+        lib[libLargest] = x.second;
+        libLargest++;
+    }
+    
+    //clear ejected
+    eject.clear();
+
 }
