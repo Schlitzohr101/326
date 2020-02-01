@@ -4,8 +4,6 @@
 //Program then asks for users choice, and 
 #include"header.h"
 
-
-
 int main() {
     srand(time(NULL));
     const int LIB_SIZE = 1024;
@@ -33,8 +31,6 @@ int main() {
         lib.insert(pair<int,Document*>(i,new Document(size)));
     }
 
-    cout << "lib size: " << lib.size() << endl;
-
     cout << "init recent list" << endl;
     //cout << "------------------------------------------------------------------------------" << endl;
     for (int i = 0; i < REC_SIZE; i++)
@@ -43,8 +39,6 @@ int main() {
         //cout << "setting intial size of document#" << i << " to " << size << endl;
         recentList.insert(pair<int,Document*>(i,new Document(size)));
     }
-
-    cout << "rec size: " << recentList.size() << endl;
     
     bool exited = false;
 
@@ -122,7 +116,6 @@ void adjustLists(map<int,Document*> &rec,map<int,Document*> &lib,map<int,int> &e
     }
     recLargest++;
     
-
     //add top lib files to recent
     int index = 0;
     while (rec.size() < 128)
@@ -134,8 +127,6 @@ void adjustLists(map<int,Document*> &rec,map<int,Document*> &lib,map<int,int> &e
         index++;
         recLargest++;
     }
-
-
 
     int libLargest = -1;
     for (auto const& x : lib)
