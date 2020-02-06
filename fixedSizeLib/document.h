@@ -1,3 +1,6 @@
+//William Murray
+//main.cpp document.cpp document.h header.h
+//Document header. Class definition of Documents
 #ifndef DOCUMENT_H
 #define DOCUMENT_H
 #include <string>
