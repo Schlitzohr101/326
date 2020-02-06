@@ -1,7 +1,7 @@
 //William Murray
-//
-//Program generates 1024 documents of size 2Mb to 3Mb, of random uppercase characters. 
-//Program then asks for users choice, and 
+//main.cpp document.cpp document.h header.h
+//Program main. Creates maps for lib and recent list, as well as the ejected list
+//program logic for taking inputs for selections, and processing based on selection
 #include"header.h"
 
 int main() {
@@ -9,39 +9,33 @@ int main() {
     const int LIB_SIZE = 1024;
     const int REC_SIZE = 128;
 
-    string words[] = {"FIRST", "CPP", "REVIEW", "PROGRAM", "ASSIGNMENT", "CECS", "BEACH", "ECS", "FALL", "SPRING", "OS", "MAC", "LINUX", "WINDOWS", "LAB"};
+    string words[] = {"FIRST", "CPP", "REVIEW", "PROGRAM", "ASSIGNMENT", "CECS",
+    "BEACH", "ECS", "FALL", "SPRING", "OS", "MAC", "LINUX", "WINDOWS", "LAB"};
 
-    //create the lib 
+    //create the main lib 
     map<int,Document*> lib;
 
-    //dynamic recent list
+    //dynamic recent list lib
     map<int,Document*> recentList;
 
-    //list holding the ejected values
+    //list holding the ejected documents indexes in rec list
     map<int,int> ejected;
 
     //init maps
-    std::cout << "init Lib" << endl;
-    //cout << "------------------------------------------------------------------------------" << endl; 
-    
     for (int i = 0; i < LIB_SIZE; i++)
     {
         int size = rand()%1000 + 2000;
-        //cout << "setting intial size of document#" << i << " to " << size << endl;
         lib.insert(pair<int,Document*>(i,new Document(size)));
     }
-
-    cout << "init recent list" << endl;
-    //cout << "------------------------------------------------------------------------------" << endl;
     for (int i = 0; i < REC_SIZE; i++)
     {
         int size = rand()%1000 + 2000;
-        //cout << "setting intial size of document#" << i << " to " << size << endl;
         recentList.insert(pair<int,Document*>(i,new Document(size)));
     }
     
-    bool exited = false;
 
+    //Program loop init
+    bool exited = false;
     cout << "What word would you like to find: " << endl;
     for (int i = 0; i < 15; i++) {
         cout << words[i] << (i+1<15?", ":"\n");
@@ -53,32 +47,45 @@ int main() {
     {
         bool inputError = false;
         getline(cin, input);
-        for (auto &&word : words)
-        {
-            if (toupper(input[0]) == word[0] && toupper(input[1]) == word[1]) {
-                input = word;
-            } else if (toupper(input[0]) == 'Q') {
-                exited = true;
+        //input handeling
+        bool isInt = true;
+        try {
+            stoi(input);
+        } catch (exception e) {
+            isInt = false;
+            //check what was entered against all words
+            for (auto &&word : words)
+            {
+                //if the first two characters match, then set the input to the word
+                if (toupper(input[0]) == word[0] && toupper(input[1]) == word[1]) {
+                    input = word;
+                } else if (toupper(input[0]) == 'Q') {
+                    exited = true;
+                }
             }
         }
+        //set input error to if the input was a int
+        inputError = isInt;
         if (input[0] != toupper(input[0]) && !exited) {
             inputError = true;
         }
+        //if the input wasn't garbage search for word
         if (!exited && !inputError) {
+            cout << "rec list: " << recentList.size() << endl;
             int index = 0;
-            for (auto const& x : recentList)
+            for (auto const& recDoc : recentList)
             {
-                //cout << "checking doc: "<< x.second << endl;
-                if (!x.second->findWord(input))
+                if (!recDoc.second->findWord(input))
                 {
-                    //cout << "doc didn't contain " << input << endl;
-                    ejected.insert(pair<int,int>(index,x.first));
+                    //if found add index to ejected lib
+                    ejected.insert(pair<int,int>(index,recDoc.first));
                     index++;
                 }  
             }
+            //adjust libs if need be
             if (!ejected.empty()) {
                 cout << input << ": " << ejected.size() << " documents rejected & reinitialized\n\n";
-                adjustLists(recentList,lib,ejected);
+                adjustLibs(recentList,lib,ejected);
             } else {
                 cout << input << ": found in all cases, no files reinitialized\n\n";
             }
@@ -99,9 +106,11 @@ int main() {
     cout << "Shutting down ..." << endl;
 }
 
-void adjustLists(map<int,Document*> &rec,map<int,Document*> &lib,map<int,int> &eject) {
-    //calculate bottom of recent list
-    //delete all indexes stored in eject
+//adds to end of recent from beginning of lib, reinits ejected docs to the 
+//end of lib with their previous lengths
+void adjustLibs(map<int,Document*> &rec,map<int,Document*> &lib,map<int,int> &eject) {
+    //store lengths of all ejected documents
+    //delete all indexes stored in eject from rec lib
     int ar[eject.size()];
     for (int i = 0; i < eject.size(); i++)
     {
@@ -109,35 +118,31 @@ void adjustLists(map<int,Document*> &rec,map<int,Document*> &lib,map<int,int> &e
         rec.erase(eject[i]);
     }
 
-    int recLargest = -1;
-    for (auto const& x : rec)
-    {
-       recLargest = (x.first > recLargest?x.first:recLargest);
-    }
-    recLargest++;
+    //calculate the largest index in rec list
+    int lrgstRecInd = rec.end()->first;
+    lrgstRecInd++; // no duplicates allowed in map
     
     //add top lib files to recent
-    int index = 0;
+    int index = lib.begin()->first;
     while (rec.size() < 128)
     {
         try {
-            rec.insert(pair<int,Document*>(recLargest,lib.at(index)));
+            rec.insert(pair<int,Document*>(lrgstRecInd,lib.at(index)));
             lib.erase(index);
-        } catch (exception e){}
+        } catch (exception e){
+            cerr << "skip in lib" << endl;
+        } //handle any time there is a skip in the lib
         index++;
-        recLargest++;
+        lrgstRecInd++;
     }
 
-    int libLargest = -1;
-    for (auto const& x : lib)
-    {
-       libLargest = (x.first > libLargest?x.first:libLargest);
-    }
-    libLargest++;
+    //get largest index in lib
+    int lrgstLibInd = lib.end()->first;
+    lrgstLibInd++;
     for (int i = 0; i < eject.size(); i++)
     {
-        lib[libLargest] = new Document(ar[i]);
-        libLargest++;
+        lib[lrgstLibInd] = new Document(ar[i]);
+        lrgstLibInd++;
     }
     
     
