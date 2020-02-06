@@ -25,7 +25,8 @@ int main() {
     for (int i = 0; i < LIB_SIZE; i++)
     {
         int size = rand()%1000 + 2000;
-        lib.insert(pair<int,Document*>(i,new Document(size)));
+        lib[i] = new Document(size);
+        //lib.insert(pair<int,Document*>(i,new Document(size)));
     }
     for (int i = 0; i < REC_SIZE; i++)
     {
@@ -71,7 +72,6 @@ int main() {
         }
         //if the input wasn't garbage search for word
         if (!exited && !inputError) {
-            cout << "rec list: " << recentList.size() << endl;
             int index = 0;
             for (auto const& recDoc : recentList)
             {
@@ -119,32 +119,50 @@ void adjustLibs(map<int,Document*> &rec,map<int,Document*> &lib,map<int,int> &ej
     }
 
     //calculate the largest index in rec list
-    int lrgstRecInd = rec.end()->first;
+    int lrgstRecInd = -1;
+    for (auto &&x : lib)
+    {
+        lrgstRecInd = (x.first>lrgstRecInd?x.first:lrgstRecInd);
+    }
     lrgstRecInd++; // no duplicates allowed in map
-    
+
+    //calculate largest index in lib
+    int lrgstLibInd = -1;
+    for (auto &&x : lib)
+    {
+        lrgstLibInd = (x.first>lrgstLibInd?x.first:lrgstLibInd);
+    }
+    lrgstLibInd++;
+
     //add top lib files to recent
-    int index = lib.begin()->first;
+    int index = lrgstRecInd-1024;
     while (rec.size() < 128)
     {
         try {
-            rec.insert(pair<int,Document*>(lrgstRecInd,lib.at(index)));
-            lib.erase(index);
+            pair<map<int,Document*>::iterator, bool> didInsert = 
+                rec.insert(pair<int,Document*>(lrgstRecInd,lib.at(index)));
+                
+            if (didInsert.second) {
+                lib.erase(index);
+                lrgstRecInd++;
+            }
         } catch (exception e){
-            cerr << "skip in lib" << endl;
+            cout << "EXCEPTION" << endl;
         } //handle any time there is a skip in the lib
-        index++;
-        lrgstRecInd++;
+        index++; 
     }
 
-    //get largest index in lib
-    int lrgstLibInd = lib.end()->first;
-    lrgstLibInd++;
+    //reint the lib
     for (int i = 0; i < eject.size(); i++)
     {
-        lib[lrgstLibInd] = new Document(ar[i]);
+        try {
+            lib.insert(pair<int,Document*>(lrgstLibInd,new Document(ar[i])));
+        } catch (exception e) {
+            cout << "falied to put back in lib\nlargest index used was invalid" 
+                 << endl;
+        }
         lrgstLibInd++;
     }
-    
     
     //clear ejected
     eject.clear();

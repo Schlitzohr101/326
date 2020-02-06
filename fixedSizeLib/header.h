@@ -6,6 +6,7 @@
 #include<iostream>
 #include<random>
 #include<ctime>
+#include<cstring>
 #include<map>
 #include"document.h"
 
