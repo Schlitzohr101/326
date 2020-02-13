@@ -35,7 +35,7 @@ bool Document::findWord(string word) {
     //temp array to keep a piece of the document in
     int i = 0;
     char * temp ;
-    cout << "ENTERING REC" << endl;
+    //cout << "ENTERING REC" << endl;
     return findRec(i,word, temp);
 }
 
@@ -53,12 +53,12 @@ bool Document::findRec(int index, string word, char * temp) {
             loop++;
         }
         string compare = string(temp,n);
+        delete temp;
         cout << "Created word: " << compare << endl;
         found = word == compare;
     }
     if(!found && index+n < length) {
-        delete temp;
-        cout << "NOT FOUND REC AGAIN" << endl;
+    cout << "NOT FOUND REC AGAIN" << endl;
         return findRec(index+n,word, temp);
     }
     return found;
