@@ -34,32 +34,36 @@ void Document::setLength(int len) {
 bool Document::findWord(string word) {
     //temp array to keep a piece of the document in
     int i = 0;
-    char * temp ;
+    char temp[word.size()];
     //cout << "ENTERING REC" << endl;
-    return findRec(i,word, temp);
+    return findRec(i,word,temp);
 }
 
 
-bool Document::findRec(int index, string word, char * temp) {
+bool Document::findRec(int index, string word, char temp[]) {
     int n = word.size();
     bool found = false;
-    temp = new char[n];
-    cout << "Testing: \n" << "index: " << index << " of " << length << endl;
+    cout << "Testing: \n" << "index: " << index << " of " << length-1 << endl;
     if (index + n < length) {
         int loop = 0;
+        //cout << "start loop to create temp" << endl;
         for (int j = index; j < index+n; j++)
         {   
+            //cout << "adding " << content[j] << " to temp" << endl;
             temp[loop] = content[j];
             loop++;
         }
+        cout << "converting temp to string" << endl;
         string compare = string(temp,n);
-        delete temp;
+        //cout << "deleting temp" << endl;
+        //delete temp;
         cout << "Created word: " << compare << endl;
-        found = word == compare;
+        found = word.compare(compare) == 0;
+        if (!found) {
+            cout << "NOT FOUND REC AGAIN" << endl;
+            return findRec(index+n,word,temp);
+        }
     }
-    if(!found && index+n < length) {
-    cout << "NOT FOUND REC AGAIN" << endl;
-        return findRec(index+n,word, temp);
-    }
+    cout << "Exiting the Rec" << endl;
     return found;
 }

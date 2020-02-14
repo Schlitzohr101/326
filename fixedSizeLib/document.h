@@ -18,7 +18,7 @@ class Document {
         int getLength();
         void setLength(int);
         bool findWord(std::string);
-        bool findRec(int,std::string,char *);
+        bool findRec(int,std::string,char []);
 };
 
 #endif
