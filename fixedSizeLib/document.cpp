@@ -32,38 +32,37 @@ void Document::setLength(int len) {
 //param: string word - word to search for
 //return: if found
 bool Document::findWord(string word) {
-    //temp array to keep a piece of the document in
-    int i = 0;
-    char temp[word.size()];
-    //cout << "ENTERING REC" << endl;
-    return findRec(i,word,temp);
+    return findRec(word,0,false);
 }
 
 
-bool Document::findRec(int index, string word, char temp[]) {
+bool Document::findRec(string word,int index,bool found) {
+    cout << "create n"<<endl;
     int n = word.size();
-    bool found = false;
-    cout << "Testing: \n" << "index: " << index << " of " << length-1 << endl;
-    if (index + n < length) {
-        int loop = 0;
-        //cout << "start loop to create temp" << endl;
-        for (int j = index; j < index+n; j++)
-        {   
-            //cout << "adding " << content[j] << " to temp" << endl;
-            temp[loop] = content[j];
-            loop++;
+    cout << "checking \nindex: "<<index<<endl;
+    cout << "for document #"<<length<<endl;
+    if (index+n < length) {
+        char ar[n];
+        for (int i = 0; i < n; i++){
+            ar[i] = content[index+i];
+            cout << "ar#"<<i<<" :"<<ar[i]<<endl;
         }
-        cout << "converting temp to string" << endl;
-        string compare = string(temp,n);
-        //cout << "deleting temp" << endl;
-        //delete temp;
-        cout << "Created word: " << compare << endl;
-        found = word.compare(compare) == 0;
-        if (!found) {
-            cout << "NOT FOUND REC AGAIN" << endl;
-            return findRec(index+n,word,temp);
+        found = (word.compare(string(ar)) == 0);
+        index += n;
+        if (found)
+        {
+            cout << "found" << endl;
+            return true;   
+        } else {
+            cout << "rec again" << endl;
+            try {
+                findRec(word,index,found);
+            } catch(exception e) {
+                cout << "borked rec"<<endl;
+            }
         }
     }
-    cout << "Exiting the Rec" << endl;
-    return found;
+    cout << "exiting rec" << endl;
+    return false;
+    
 }
