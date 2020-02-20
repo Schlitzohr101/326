@@ -23,16 +23,14 @@ int main() {
 
     //init maps
     for (int i = 0; i < LIB_SIZE; i++)
-    {
-        int size = rand()%100000 + 200000;
-        //int size = rand()%1000000 + 2000000;
+    {        
+        int size = rand()%1000000 + 2000000;
         lib[i] = new Document(size);
         //lib.insert(pair<int,Document*>(i,new Document(size)));
     }
     for (int i = 0; i < REC_SIZE; i++)
     {
-        int size = rand()%100000 + 200000;
-        //int size = rand()%1000000 + 2000000;
+        int size = rand()%1000000 + 2000000;
         recentList.insert(pair<int,Document*>(i,new Document(size)));
     }
     
